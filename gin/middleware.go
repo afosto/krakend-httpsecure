@@ -37,6 +37,11 @@ func secureMw(opt secure.Options) gin.HandlerFunc {
 	secureMiddleware := secure.New(opt)
 
 	return func(c *gin.Context) {
+
+		if isHealthEndpoint(c.Request.URL.Path) {
+			return
+		}
+
 		err := secureMiddleware.Process(c.Writer, c.Request)
 
 		if err != nil {
@@ -48,4 +53,11 @@ func secureMw(opt secure.Options) gin.HandlerFunc {
 			c.Abort()
 		}
 	}
+}
+
+func isHealthEndpoint(path string) bool {
+	if path == "/healthz" || path == "/_ah/health" || path == "/__health" {
+		return true
+	}
+	return false
 }
